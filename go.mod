@@ -1,4 +1,4 @@
-module tasks
+module github.com/dmxmss/tasks
 
 go 1.24.1
 
