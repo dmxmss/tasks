@@ -5,11 +5,10 @@ import (
 )
 
 type GetTaskDto struct {
-	Name string
-	Description *string 
-	Status *string
-	Deadline *time.Time
-	Tags []Tag 
-	Weather *string
-	UserID uint
+	Name string `json:"name"`
+	Description *string `json:"description;omitempty"`
+	Status *string `json:"status;omitempty"`
+	Deadline *time.Time `json:"deadline;omitempty"`
+	Weather *string `json:"weather;omitempty"`
+	UserID uint `json:"user_id"`
 }

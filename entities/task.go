@@ -10,7 +10,7 @@ type Task struct {
 	Description *string 
 	Status *string
 	Deadline *time.Time
-	Tags []Tag `gorm:"many2many:task_tags;"`
+	Tags []string
 	Weather *string
 	UserID uint
 	User User
