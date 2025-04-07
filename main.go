@@ -7,7 +7,12 @@ import (
 
 func main() {
 	conf := config.GetConfig()
-	s := server.NewGinServer(conf)
+	s, err := server.NewGinServer(conf)
+	if err != nil {
+		panic(err)
+	}
+
+	s.RegisterHandlers()
 
 	s.Start()
 }

@@ -19,6 +19,7 @@ type (
 	}
 
 	Database struct {
+		Host string
 		Name string	
 		User string
 		Port string
@@ -41,11 +42,12 @@ func GetConfig() *Config {
 		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 		viper.SetDefault("app.address", "localhost")
-		viper.SetDefault("app.port", "8080")
+		viper.SetDefault("app.port", "8000")
 
 		viper.SetDefault("database.name", "postrges")
 		viper.SetDefault("database.user", "postgres")
 		viper.SetDefault("database.port", "5432")
+		viper.SetDefault("database.host", "db")
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)

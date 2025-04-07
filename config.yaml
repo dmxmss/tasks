@@ -1,0 +1,9 @@
+app:
+  port: "8000"
+  address: "0.0.0.0"
+database:
+  user: postgres
+  port: "5432"
+  name: postgres
+  host: db
+  password: mypassword
