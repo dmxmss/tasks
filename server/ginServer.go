@@ -28,6 +28,7 @@ func NewGinServer(conf *config.Config) (*GinServer, error) {
 }
 
 func (s *GinServer) RegisterHandlers() {
+	s.app.Use(ErrorMiddleware())
 	RegisterHandlers(s.app, s)	
 }
 

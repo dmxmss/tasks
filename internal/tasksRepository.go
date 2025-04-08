@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/postgres"
 
 	"fmt"
+	"errors"
 )
 
 type TasksRepository interface {
@@ -29,7 +30,7 @@ func NewPgTasksRepository(config *config.Config) (TasksRepository, error) {
 		config.Database.Port,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})	
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{TranslateError: true})	
 	if err != nil {
 		return nil, e.ErrDbInitError
 	}
@@ -55,9 +56,14 @@ func (t *TasksPostgresRepo) CreateTask(createTask entities.CreateTaskDto) (*enti
 		Tags: createTask.Tags,
 		UserID: createTask.UserID,
 	}
-	err := t.db.Model(&entities.Task{}).Create(&task).Error
+
+	err := t.db.Create(&task).Error
 	if err != nil {
-		return nil, e.ErrDbTransactionFailed
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return nil, e.ErrDbUserForeignKeyViolation
+		} else {
+			return nil, e.ErrDbTransactionFailed
+		}
 	}
 
 	return &task, nil
