@@ -4,7 +4,11 @@
 package server
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/oapi-codegen/runtime"
 )
 
 // ServerInterface represents all server handlers.
@@ -15,6 +19,9 @@ type ServerInterface interface {
 	// Create a new task
 	// (POST /tasks)
 	CreateTask(c *gin.Context)
+	// Patch task
+	// (PATCH /tasks/{id})
+	PatchTask(c *gin.Context, id int)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -52,6 +59,30 @@ func (siw *ServerInterfaceWrapper) CreateTask(c *gin.Context) {
 	siw.Handler.CreateTask(c)
 }
 
+// PatchTask operation middleware
+func (siw *ServerInterfaceWrapper) PatchTask(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", c.Param("id"), &id, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.PatchTask(c, id)
+}
+
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
 	BaseURL      string
@@ -81,4 +112,5 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 
 	router.GET(options.BaseURL+"/tasks", wrapper.GetAllTasks)
 	router.POST(options.BaseURL+"/tasks", wrapper.CreateTask)
+	router.PATCH(options.BaseURL+"/tasks/:id", wrapper.PatchTask)
 }

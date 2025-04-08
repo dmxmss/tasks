@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/dmxmss/tasks/config"
 	"github.com/dmxmss/tasks/entities"
-	"github.com/dmxmss/tasks/internal"
+	"github.com/dmxmss/tasks/internal/repository"
 	"gorm.io/gorm"
 )
 
 func main() {
 	conf := config.GetConfig()
 
-	tasksRepo, err := internal.NewPgTasksRepository(conf)
+	tasksRepo, err := repository.NewPgTasksRepository(conf)
 	if err != nil {
 		panic(err)
 	}

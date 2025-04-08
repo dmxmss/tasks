@@ -1,7 +1,8 @@
-package internal
+package repository
 
 import (
 	"github.com/dmxmss/tasks/entities"
+	u "github.com/dmxmss/tasks/internal/utils"
 	"github.com/dmxmss/tasks/config"
 	e "github.com/dmxmss/tasks/error"
 	"gorm.io/gorm"
@@ -14,6 +15,7 @@ import (
 type TasksRepository interface {
 	GetAllTasks() ([]entities.Task, error)
 	CreateTask(entities.CreateTaskDto) (*entities.Task, error)
+	PatchTask(entities.PatchTaskDto) (*entities.Task, error)
 	GetDb() *gorm.DB
 }
 
@@ -49,13 +51,7 @@ func (t *TasksPostgresRepo) GetAllTasks() ([]entities.Task, error) {
 }
 
 func (t *TasksPostgresRepo) CreateTask(createTask entities.CreateTaskDto) (*entities.Task, error) {
-	task := entities.Task{
-		Name: createTask.Name,
-		Description: createTask.Description,
-		Deadline: createTask.Deadline,
-		Tags: createTask.Tags,
-		UserID: createTask.UserID,
-	}
+	task := u.FromCreateTaskDto(createTask)
 
 	err := t.db.Create(&task).Error
 	if err != nil {
@@ -64,6 +60,24 @@ func (t *TasksPostgresRepo) CreateTask(createTask entities.CreateTaskDto) (*enti
 		} else {
 			return nil, e.ErrDbTransactionFailed
 		}
+	}
+
+	return &task, nil
+}
+
+func (t *TasksPostgresRepo) PatchTask(patchTask entities.PatchTaskDto) (*entities.Task, error) {
+	var task entities.Task
+
+	if err := t.db.First(&task, patchTask.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, e.ErrDbTaskNotFound
+		} else {
+			return nil, e.ErrDbTransactionFailed
+		}
+	}
+
+	if err := t.db.Model(&task).Updates(patchTask).Error; err != nil {
+		return nil, e.ErrDbTransactionFailed
 	}
 
 	return &task, nil

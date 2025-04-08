@@ -5,8 +5,9 @@ type Error int
 const (
 	ErrDbTransactionFailed Error = iota
 	ErrDbInitError
-	ErrInvalidRequestBody
 	ErrDbUserForeignKeyViolation
+	ErrDbTaskNotFound
+	ErrInvalidRequestBody
 )
 
 func (e Error) Error() string {
@@ -18,6 +19,8 @@ func (e Error) Error() string {
 		err = "Database: init error"
 	case ErrDbUserForeignKeyViolation:
 		err = "Database: user foreign key violation"
+	case ErrDbTaskNotFound:
+		err = "Database: task not found"
 	case ErrInvalidRequestBody:
 		err = "Invalid request body"
 	}

@@ -62,3 +62,20 @@ func (s *GinServer) CreateTask(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, task)
 }
+
+func (s *GinServer) PatchTask(c *gin.Context, id int) {
+	var patchTask entities.PatchTaskDto
+	if err := c.ShouldBindJSON(&patchTask); err != nil {
+		c.Error(e.ErrInvalidRequestBody)
+		return
+	}
+	patchTask.ID = id
+	
+	task, err := s.tasksService.PatchTask(patchTask)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, task)
+}

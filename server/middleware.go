@@ -22,6 +22,9 @@ func ErrorMiddleware() gin.HandlerFunc {
 			case e.ErrDbUserForeignKeyViolation:
 				err.Error = "invalid request: user not found"
 				statusCode = http.StatusBadRequest
+			case e.ErrDbTaskNotFound:
+				err.Error = "task not found"
+				statusCode = http.StatusNotFound
 			default:
 				err.Error = "internal server error"
 				statusCode = http.StatusInternalServerError
