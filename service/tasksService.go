@@ -11,6 +11,7 @@ type TasksService interface {
 	GetAllTasks() ([]entities.GetTaskDto, error)
 	CreateTask(entities.CreateTaskDto) (*entities.GetTaskDto, error)
 	PatchTask(entities.PatchTaskDto) (*entities.GetTaskDto, error)
+	DeleteTask(int) error
 }
 
 type TasksServiceImpl struct {
@@ -61,4 +62,8 @@ func (ts *TasksServiceImpl) PatchTask(patchTask entities.PatchTaskDto) (*entitie
 	result := u.ToGetTaskDto(task)
 
 	return &result, nil
+}
+
+func (ts *TasksServiceImpl) DeleteTask(id int) error {
+	return ts.tasksRepo.DeleteTask(id)
 }

@@ -79,3 +79,12 @@ func (s *GinServer) PatchTask(c *gin.Context, id int) {
 
 	c.JSON(http.StatusOK, task)
 }
+
+func (s *GinServer) DeleteTask(c *gin.Context, id int) {
+	if err := s.tasksService.DeleteTask(id); err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}

@@ -16,6 +16,7 @@ type TasksRepository interface {
 	GetAllTasks() ([]entities.Task, error)
 	CreateTask(entities.CreateTaskDto) (*entities.Task, error)
 	PatchTask(entities.PatchTaskDto) (*entities.Task, error)
+	DeleteTask(int) error
 	GetDb() *gorm.DB
 }
 
@@ -81,6 +82,14 @@ func (t *TasksPostgresRepo) PatchTask(patchTask entities.PatchTaskDto) (*entitie
 	}
 
 	return &task, nil
+}
+
+func (t *TasksPostgresRepo) DeleteTask(id int) error {
+	if err := t.db.Delete(&entities.Task{}, id).Error; err != nil {
+		return e.ErrDbTransactionFailed
+	}
+
+	return nil
 }
 
 func (t *TasksPostgresRepo) GetDb() *gorm.DB {

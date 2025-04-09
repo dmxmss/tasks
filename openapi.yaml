@@ -39,21 +39,35 @@ paths:
         "500":
           $ref: "#/components/errors/InternalServerError"
   /tasks/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
     patch:
       summary: Patch task
       operationId: patchTask
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
       responses:
         "200":
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/GetTaskDto" 
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          $ref: "#/components/errors/InternalServerError"
+    delete:
+      description: Delete a task
+      operationId: deleteTask
+      responses:
+        "201":
+          content:
         "404":
           description: Task not found
           content:

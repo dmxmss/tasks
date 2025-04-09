@@ -19,6 +19,9 @@ type ServerInterface interface {
 	// Create a new task
 	// (POST /tasks)
 	CreateTask(c *gin.Context)
+
+	// (DELETE /tasks/{id})
+	DeleteTask(c *gin.Context, id int)
 	// Patch task
 	// (PATCH /tasks/{id})
 	PatchTask(c *gin.Context, id int)
@@ -57,6 +60,30 @@ func (siw *ServerInterfaceWrapper) CreateTask(c *gin.Context) {
 	}
 
 	siw.Handler.CreateTask(c)
+}
+
+// DeleteTask operation middleware
+func (siw *ServerInterfaceWrapper) DeleteTask(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", c.Param("id"), &id, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.DeleteTask(c, id)
 }
 
 // PatchTask operation middleware
@@ -112,5 +139,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 
 	router.GET(options.BaseURL+"/tasks", wrapper.GetAllTasks)
 	router.POST(options.BaseURL+"/tasks", wrapper.CreateTask)
+	router.DELETE(options.BaseURL+"/tasks/:id", wrapper.DeleteTask)
 	router.PATCH(options.BaseURL+"/tasks/:id", wrapper.PatchTask)
 }
