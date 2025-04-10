@@ -12,8 +12,7 @@ import (
 
 type AuthRepository interface {
 	ValidateToken(string) (*jwt.Token, error)
-	GenerateAccessToken(int) *jwt.Token
-	GenerateRefreshToken() *jwt.Token
+	GenerateTokens(int) (*string, *string, error)
 }
 
 type jwtAuthRepository struct {
@@ -28,7 +27,7 @@ func NewAuthRepository(conf *config.Auth) AuthRepository {
 
 func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
-		if token.Method != jwtRepo.conf.SigningMethod {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
 
@@ -48,7 +47,7 @@ func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*jwt.Token, er
 	return token, nil
 }
 
-func (jwtRepo *jwtAuthRepository) GenerateAccessToken(userId int) *jwt.Token {
+func (jwtRepo *jwtAuthRepository) generateAccessToken(userId int) (*string, error) {
 	exp := time.Now().Add(time.Duration(jwtRepo.conf.Access.ExpirationTime)*time.Second)
 
 	claims := entities.Claims{
@@ -58,17 +57,37 @@ func (jwtRepo *jwtAuthRepository) GenerateAccessToken(userId int) *jwt.Token {
 		},
 	}
 
-	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)
-	return token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(jwtRepo.conf.JWTSecret))
+	if err != nil {
+		return nil, e.ErrTokenSigningError
+	}
+	return &signedToken, nil
 }
 
-func (jwtRepo *jwtAuthRepository) GenerateRefreshToken() *jwt.Token {
+func (jwtRepo *jwtAuthRepository) generateRefreshToken() (*string, error) {
 	exp := time.Now().Add(time.Duration(jwtRepo.conf.Refresh.ExpirationTime)*time.Second)
 
 	claims := jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(exp),
 	}
 
-	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)
-	return token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(jwtRepo.conf.JWTSecret))
+	if err != nil {
+		return nil, e.ErrTokenSigningError
+	}
+	return &signedToken, nil
+}
+
+func (jwtRepo *jwtAuthRepository) GenerateTokens(userId int) (*string, *string, error) {
+	accessToken, err := jwtRepo.generateAccessToken(userId)
+	if err != nil {
+		return nil, nil, err
+	}
+	refreshToken, err := jwtRepo.generateRefreshToken()
+	if err != nil {
+		return nil, nil, err
+	}
+	return accessToken, refreshToken, nil
 }

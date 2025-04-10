@@ -21,8 +21,8 @@ type TasksPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewTasksRepository(db *gorm.DB) (TasksRepository, error) {
-	return &TasksPostgresRepo{db}, nil
+func NewTasksRepository(db *gorm.DB) TasksRepository {
+	return &TasksPostgresRepo{db}
 }
 
 func (t *TasksPostgresRepo) GetAllTasks() ([]entities.Task, error) {

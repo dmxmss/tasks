@@ -11,6 +11,8 @@ const (
 	ErrAuthTokenExpired
 	ErrAuthFailed
 	ErrInvalidRequestBody
+	ErrUserAlreadyExists
+	ErrTokenSigningError
 )
 
 func (e Error) Error() string {
@@ -32,6 +34,10 @@ func (e Error) Error() string {
 		err = "Auth: failed"
 	case ErrInvalidRequestBody:
 		err = "Invalid request body"
+	case ErrUserAlreadyExists:
+		err = "User already exists"
+	case ErrTokenSigningError:
+		err = "Token signing error"
 	}
 
 	return err

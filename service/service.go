@@ -10,23 +10,24 @@ import (
 type Service interface {
 	TasksService
 	AuthService
+	UserService
 }
 
-type ServiceImpl struct {
+type service struct {
 	tasksRepo repository.TasksRepository
 	authRepo repository.AuthRepository
+	userRepo repository.UserRepository
 }
 
 func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
-	tasksRepo, err := repository.NewTasksRepository(db)
-	if err != nil {
-		return nil, err
-	}
+	tasksRepo := repository.NewTasksRepository(db)
 
 	authRepo := repository.NewAuthRepository(conf.Auth)
+	userRepo := repository.NewUserRepository(db)
 
-	return &ServiceImpl{
+	return &service{
 		authRepo: authRepo,
 		tasksRepo: tasksRepo,
+		userRepo: userRepo,
 	}, nil
 }

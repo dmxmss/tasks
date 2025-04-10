@@ -13,6 +13,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (POST /auth/signup)
+	SignUp(c *gin.Context)
 	// Get all tasks
 	// (GET /tasks)
 	GetAllTasks(c *gin.Context)
@@ -35,6 +38,19 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(c *gin.Context)
+
+// SignUp operation middleware
+func (siw *ServerInterfaceWrapper) SignUp(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.SignUp(c)
+}
 
 // GetAllTasks operation middleware
 func (siw *ServerInterfaceWrapper) GetAllTasks(c *gin.Context) {
@@ -137,6 +153,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
+	router.POST(options.BaseURL+"/auth/signup", wrapper.SignUp)
 	router.GET(options.BaseURL+"/tasks", wrapper.GetAllTasks)
 	router.POST(options.BaseURL+"/tasks", wrapper.CreateTask)
 	router.DELETE(options.BaseURL+"/tasks/:id", wrapper.DeleteTask)

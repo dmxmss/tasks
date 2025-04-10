@@ -76,6 +76,16 @@ paths:
                 $ref: "#/components/schemas/Error"
         "500":
           $ref: "#/components/errors/InternalServerError"
+  /auth/signup:
+    post:
+      description: Create a user 
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserDto"
 components:
   schemas:
     GetTaskDto:
@@ -120,6 +130,35 @@ components:
       required:
         - name
         - user_id
+    CreateUserDto:
+      type: object
+      properties:
+        full_name: 
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        city: 
+          type: string
+      required:
+        - full_name
+        - email
+        - password
+    GetUserDto:
+      type: object
+      properties:
+        full_name: 
+          type: string
+        email:
+          type: string
+          format: email
+        city: 
+          type: string
+      required:
+        - full_name
+        - email
     Tag:
       type: object
       properties:

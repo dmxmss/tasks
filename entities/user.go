@@ -1,13 +1,9 @@
 package entities
 
-import (
-	"gorm.io/gorm"
-)
-
 type User struct {
-	gorm.Model
-	FullName string
-	Email string
-	Password string
-	City string
+	ID int `gorm:"primaryKey"`
+	FullName string `gorm:"not null"`
+	Email string `gorm:"not null;unique"`
+	Password string `gorm:"not null"`
+	City *string
 }
