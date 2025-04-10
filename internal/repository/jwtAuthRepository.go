@@ -27,7 +27,7 @@ func NewAuthRepository(conf *config.Auth) AuthRepository {
 
 func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if token.Method != jwtRepo.conf.SigningMethod {
 			return nil, jwt.ErrSignatureInvalid
 		}
 
@@ -57,7 +57,7 @@ func (jwtRepo *jwtAuthRepository) generateAccessToken(userId int) (*string, erro
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)
 	signedToken, err := token.SignedString([]byte(jwtRepo.conf.JWTSecret))
 	if err != nil {
 		return nil, e.ErrTokenSigningError
@@ -72,7 +72,7 @@ func (jwtRepo *jwtAuthRepository) generateRefreshToken() (*string, error) {
 		ExpiresAt: jwt.NewNumericDate(exp),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)
 	signedToken, err := token.SignedString([]byte(jwtRepo.conf.JWTSecret))
 	if err != nil {
 		return nil, e.ErrTokenSigningError

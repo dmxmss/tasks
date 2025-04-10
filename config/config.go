@@ -64,7 +64,7 @@ func GetConfig() *Config {
 
 		viper.SetDefault("auth.access.expirationtime", 60*60)
 		viper.SetDefault("auth.refresh.expirationtime", 60*60*24*7)
-		viper.SetDefault("auth.auth.signingmethod", &jwt.SigningMethodHMAC{})
+		viper.SetDefault("auth.signingmethod", jwt.SigningMethodHS256)
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)
