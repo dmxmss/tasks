@@ -3,6 +3,8 @@ package service
 import (
 	"github.com/dmxmss/tasks/internal/repository"
 	"github.com/dmxmss/tasks/config"
+
+	"gorm.io/gorm"
 )
 
 type Service interface {
@@ -15,8 +17,8 @@ type ServiceImpl struct {
 	authRepo repository.AuthRepository
 }
 
-func NewService(conf *config.Config) (Service, error) {
-	tasksRepo, err := repository.NewTasksRepository(conf)
+func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
+	tasksRepo, err := repository.NewTasksRepository(db)
 	if err != nil {
 		return nil, err
 	}

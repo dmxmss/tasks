@@ -3,12 +3,9 @@ package repository
 import (
 	"github.com/dmxmss/tasks/entities"
 	u "github.com/dmxmss/tasks/internal/utils"
-	"github.com/dmxmss/tasks/config"
 	e "github.com/dmxmss/tasks/error"
 	"gorm.io/gorm"
-	"gorm.io/driver/postgres"
 
-	"fmt"
 	"errors"
 )
 
@@ -24,20 +21,7 @@ type TasksPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewTasksRepository(config *config.Config) (TasksRepository, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		config.Database.Host,
-		config.Database.User,
-		config.Database.Password,
-		config.Database.Name,
-		config.Database.Port,
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{TranslateError: true})	
-	if err != nil {
-		return nil, e.ErrDbInitError
-	}
-	
+func NewTasksRepository(db *gorm.DB) (TasksRepository, error) {
 	return &TasksPostgresRepo{db}, nil
 }
 

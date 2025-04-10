@@ -4,6 +4,7 @@ import (
 	"github.com/dmxmss/tasks/config"
 	"github.com/dmxmss/tasks/service"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
 	"fmt"
 )
@@ -14,10 +15,10 @@ type GinServer struct {
 	service service.Service
 }
 
-func NewGinServer(conf *config.Config) (*GinServer, error) {
+func NewGinServer(conf *config.Config, db *gorm.DB) (*GinServer, error) {
 	r := gin.Default()
 
-	service, err := service.NewService(conf)
+	service, err := service.NewService(conf, db)
 	if err != nil {
 		return nil, err
 	}
