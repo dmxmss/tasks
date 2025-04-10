@@ -24,7 +24,7 @@ type TasksPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewPgTasksRepository(config *config.Config) (TasksRepository, error) {
+func NewTasksRepository(config *config.Config) (TasksRepository, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		config.Database.Host,
 		config.Database.User,

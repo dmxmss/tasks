@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/spf13/viper"
+	"github.com/golang-jwt/jwt/v5"
 
 	"sync"
 	"strings"
@@ -11,6 +12,7 @@ type (
 	Config struct {
 		App *App
 		Database *Database
+		Auth *Auth
 	}
 
 	App struct {
@@ -24,6 +26,17 @@ type (
 		User string
 		Port string
 		Password string
+	}
+
+	Auth struct {
+		JWTSecret string
+		SigningMethod jwt.SigningMethod
+		Access Token
+		Refresh Token
+	}
+
+	Token struct {
+		ExpirationTime int
 	}
 )
 
@@ -48,6 +61,9 @@ func GetConfig() *Config {
 		viper.SetDefault("database.user", "postgres")
 		viper.SetDefault("database.port", "5432")
 		viper.SetDefault("database.host", "db")
+
+		viper.SetDefault("auth.access.expirationtime", 60*60)
+		viper.SetDefault("auth.refresh.expirationtime", 60*60*24*7)
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)

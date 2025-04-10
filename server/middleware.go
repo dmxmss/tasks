@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"net/http"
+	"strings"
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
@@ -32,5 +33,37 @@ func ErrorMiddleware() gin.HandlerFunc {
 
 			c.JSON(statusCode, err)
 		}
+	}
+}
+
+func (s *GinServer) JWTMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			return
+		}
+
+		rawToken := strings.TrimPrefix(authHeader, "Bearer")
+		if rawToken == authHeader {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			return
+		}
+
+		token, err := s.service.ValidateToken(rawToken)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			return
+		}
+
+
+		claims, ok := token.Claims.(entities.Claims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			return
+		}
+		c.Set("user_id", claims.UserID)
+		
+		c.Next()
 	}
 }

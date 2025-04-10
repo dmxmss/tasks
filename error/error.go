@@ -7,6 +7,9 @@ const (
 	ErrDbInitError
 	ErrDbUserForeignKeyViolation
 	ErrDbTaskNotFound
+	ErrAuthSignatureInvalid
+	ErrAuthTokenExpired
+	ErrAuthFailed
 	ErrInvalidRequestBody
 )
 
@@ -21,6 +24,12 @@ func (e Error) Error() string {
 		err = "Database: user foreign key violation"
 	case ErrDbTaskNotFound:
 		err = "Database: task not found"
+	case ErrAuthSignatureInvalid:
+		err = "Auth: token signature invalid"
+	case ErrAuthTokenExpired:
+		err = "Auth: token expired"
+	case ErrAuthFailed:
+		err = "Auth: failed"
 	case ErrInvalidRequestBody:
 		err = "Invalid request body"
 	}
