@@ -26,6 +26,9 @@ func ErrorMiddleware() gin.HandlerFunc {
 			case e.ErrDbTaskNotFound:
 				err.Error = "task not found"
 				statusCode = http.StatusNotFound
+			case e.ErrUserAlreadyExists:
+				err.Error = "user with this email already exists"
+				statusCode = http.StatusConflict
 			default:
 				err.Error = "internal server error"
 				statusCode = http.StatusInternalServerError

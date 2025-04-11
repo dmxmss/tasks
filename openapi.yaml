@@ -86,7 +86,33 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateUserDto"
+  /auth/login:
+    post:
+      operationId: logIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginUserDto"
+      responses:
+        "200":
+          headers:
+            access_token: 
+              description: Access token
+              schema:
+                type: string
+            refresh_token: 
+              description: Refresh token
+              schema:
+                type: string
+          content:
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     GetTaskDto:
       type: object
@@ -158,6 +184,20 @@ components:
           type: string
       required:
         - full_name
+        - email
+    LoginUserDto:
+      type: object
+      properties:
+        full_name: 
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - full_name
+        - password
         - email
     Tag:
       type: object

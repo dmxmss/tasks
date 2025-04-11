@@ -10,8 +10,10 @@ const (
 	ErrAuthSignatureInvalid
 	ErrAuthTokenExpired
 	ErrAuthFailed
+	ErrAuthInvalidCredentials
 	ErrInvalidRequestBody
 	ErrUserAlreadyExists
+	ErrUserNotFound
 	ErrTokenSigningError
 )
 
@@ -32,10 +34,14 @@ func (e Error) Error() string {
 		err = "Auth: token expired"
 	case ErrAuthFailed:
 		err = "Auth: failed"
+	case ErrAuthInvalidCredentials:
+		err = "Auth: invalid credentials"
 	case ErrInvalidRequestBody:
 		err = "Invalid request body"
 	case ErrUserAlreadyExists:
 		err = "User already exists"
+	case ErrUserNotFound:
+		err = "User not found"
 	case ErrTokenSigningError:
 		err = "Token signing error"
 	}

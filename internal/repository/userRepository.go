@@ -10,6 +10,7 @@ import (
 
 type UserRepository interface {
 	CreateUser(entities.CreateUserDto) (*entities.User, error)
+	GetUserByEmail(string) (*entities.User, error)
 }
 
 type userRepository struct {
@@ -37,4 +38,17 @@ func (ur *userRepository) CreateUser(createUser entities.CreateUserDto) (*entiti
 	}
 
 	return &user, nil	
+}
+
+func (ur *userRepository) GetUserByEmail(email string) (*entities.User, error) {
+	var user entities.User
+	if err := ur.db.Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, e.ErrUserNotFound
+		} else {
+			return nil, e.ErrDbTransactionFailed
+		}
+	}
+
+	return &user, nil
 }

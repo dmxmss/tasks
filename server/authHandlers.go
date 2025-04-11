@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/dmxmss/tasks/entities"
+	u "github.com/dmxmss/tasks/internal/utils"
 	e "github.com/dmxmss/tasks/error"
 	"github.com/gin-gonic/gin"
 )
@@ -26,23 +27,33 @@ func (s *GinServer) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(
-    "access_token",
-    *accessToken,
-		s.conf.Auth.Access.ExpirationTime, 
-		"/", 
-		"", 
-		true, 
-		true,
-	)
+	u.WriteTokenToCookies(c, *accessToken, 
+													 *refreshToken, 
+													 s.conf.Auth.Access.ExpirationTime,
+													 s.conf.Auth.Refresh.ExpirationTime)
+}
 
-	c.SetCookie(
-    "refresh_token",
-    *refreshToken,
-		s.conf.Auth.Refresh.ExpirationTime, 
-		"/auth/refresh", 
-		"", 
-		true, 
-		true,
-	)
+func (s *GinServer) LogIn(c *gin.Context) {
+	var loginData entities.LoginUserDto
+	if err := c.ShouldBindJSON(&loginData); err != nil {
+		c.Error(e.ErrInvalidRequestBody)
+		return
+	}
+
+	user, err := s.service.LogIn(loginData)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	
+	accessToken, refreshToken, err := s.service.GenerateTokens(user.ID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	u.WriteTokenToCookies(c, *accessToken, 
+													 *refreshToken, 
+													 s.conf.Auth.Access.ExpirationTime,
+													 s.conf.Auth.Refresh.ExpirationTime)
 }

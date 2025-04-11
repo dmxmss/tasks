@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/dmxmss/tasks/entities"
+	"github.com/gin-gonic/gin"
 )
 
 func ToGetTaskDto(task *entities.Task) entities.GetTaskDto {
@@ -25,4 +26,26 @@ func FromCreateTaskDto(createTask entities.CreateTaskDto) entities.Task {
 		Tags: createTask.Tags,
 		UserID: createTask.UserID,
 	}
+}
+
+func WriteTokenToCookies(c *gin.Context, accessToken, refreshToken string, accessExpire, refreshExpire int) {
+	c.SetCookie(
+    "access_token",
+    accessToken,
+		accessExpire,
+		"/", 
+		"", 
+		true, 
+		true,
+	)
+
+	c.SetCookie(
+    "refresh_token",
+    refreshToken,
+		refreshExpire,
+		"/auth/refresh", 
+		"", 
+		true, 
+		true,
+	)
 }
