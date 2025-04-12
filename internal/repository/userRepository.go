@@ -10,7 +10,7 @@ import (
 
 type UserRepository interface {
 	CreateUser(entities.CreateUserDto) (*entities.User, error)
-	GetUserByEmail(string) (*entities.User, error)
+	GetUserBy(entities.SearchUserDto) (*entities.User, error)
 }
 
 type userRepository struct {
@@ -40,15 +40,19 @@ func (ur *userRepository) CreateUser(createUser entities.CreateUserDto) (*entiti
 	return &user, nil	
 }
 
-func (ur *userRepository) GetUserByEmail(email string) (*entities.User, error) {
+func (ur *userRepository) GetUserBy(searchUser entities.SearchUserDto) (*entities.User, error) {
 	var user entities.User
-	if err := ur.db.Where("email = ?", email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, e.ErrUserNotFound
-		} else {
-			return nil, e.ErrDbTransactionFailed
-		}
+	query := ur.db.Model(&entities.User{})
+
+	if searchUser.ID != nil {
+		query = query.Where("id = ?", *searchUser.ID)		
 	}
+
+	if searchUser.Email != nil {
+		query = query.Where("email = ?", *searchUser.Email)		
+	}
+
+	query.First(&user)
 
 	return &user, nil
 }

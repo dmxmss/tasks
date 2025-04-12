@@ -1,0 +1,47 @@
+/auth/signup:
+  post:
+    description: Create a user 
+    operationId: signUp
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/CreateUserDto"
+/auth/login:
+  post:
+    operationId: logIn
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/LoginUserDto"
+    responses:
+      "200":
+        headers:
+          access_token: 
+            description: Access token
+            schema:
+              type: string
+          refresh_token: 
+            description: Refresh token
+            schema:
+              type: string
+        content: {}
+/auth/me:
+  securitySchemes:
+    $ref: "../components/security.yaml#/bearerAuth" 
+  get:
+    operationId: getUserInfo
+    responses:
+      "200":
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/GetUserDto"
+      "403":
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/Error"

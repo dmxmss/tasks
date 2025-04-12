@@ -7,6 +7,7 @@ import (
 
 	"net/http"
 	"strings"
+	"errors"
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
@@ -27,8 +28,11 @@ func ErrorMiddleware() gin.HandlerFunc {
 				err.Error = "task not found"
 				statusCode = http.StatusNotFound
 			case e.ErrUserAlreadyExists:
-				err.Error = "user with this email already exists"
+				err.Error = "user already exists"
 				statusCode = http.StatusConflict
+			case e.ErrAuthInvalidCredentials:
+				err.Error = "invalid credentials"
+				statusCode = http.StatusUnauthorized
 			default:
 				err.Error = "internal server error"
 				statusCode = http.StatusInternalServerError
@@ -43,29 +47,29 @@ func (s *GinServer) JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "missing authorization header"})
 			return
 		}
 
-		rawToken := strings.TrimPrefix(authHeader, "Bearer")
+		rawToken := strings.TrimPrefix(authHeader, "Bearer ")
 		if rawToken == authHeader {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "invalid authentication type"})
 			return
 		}
 
-		token, err := s.service.ValidateToken(rawToken)
+		claims, err := s.service.ValidateToken(rawToken)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
+			if errors.Is(err, e.ErrAuthTokenExpired) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "token expired"})
+			} else if errors.Is(err, e.ErrAuthTokenInvalid) {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "token is invalid"})
+			} else {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "token expired"})
+			}
 			return
 		}
 
-
-		claims, ok := token.Claims.(entities.Claims)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "unauthorized"})
-			return
-		}
-		c.Set("user_id", claims.UserID)
+		c.Set("claims", claims)
 		
 		c.Next()
 	}

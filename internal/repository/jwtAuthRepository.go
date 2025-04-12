@@ -11,7 +11,7 @@ import (
 )
 
 type AuthRepository interface {
-	ValidateToken(string) (*jwt.Token, error)
+	ValidateToken(string) (*entities.Claims, error)
 	GenerateTokens(int) (*string, *string, error)
 }
 
@@ -25,14 +25,16 @@ func NewAuthRepository(conf *config.Auth) AuthRepository {
 	}
 }
 
-func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*jwt.Token, error) {
-	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
+func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*entities.Claims, error) {
+	token, err := jwt.ParseWithClaims(rawToken, &entities.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if token.Method != jwtRepo.conf.SigningMethod {
 			return nil, jwt.ErrSignatureInvalid
 		}
 
-		return jwtRepo.conf.JWTSecret, nil
+		return []byte(jwtRepo.conf.JWTSecret), nil
 	})
+
+	claims, ok := token.Claims.(*entities.Claims)
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrSignatureInvalid) {
@@ -42,9 +44,11 @@ func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*jwt.Token, er
 		} else {
 			return nil, e.ErrAuthFailed
 		}
+	} else if !token.Valid || !ok {
+		return nil, e.ErrAuthTokenInvalid
 	}
 
-	return token, nil
+	return claims, nil
 }
 
 func (jwtRepo *jwtAuthRepository) generateAccessToken(userId int) (*string, error) {
@@ -55,6 +59,10 @@ func (jwtRepo *jwtAuthRepository) generateAccessToken(userId int) (*string, erro
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(exp),
 		},
+	}
+	_, err := claims.GetExpirationTime()
+	if err != nil {
+		panic(err)
 	}
 
 	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)

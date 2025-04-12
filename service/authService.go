@@ -5,17 +5,17 @@ import (
 )
 
 type AuthService interface {
-	ValidateToken(string) (*entities.Token, error)
+	ValidateToken(string) (*entities.Claims, error)
 	GenerateTokens(int) (*string, *string, error)
 }
 
-func (s*service) ValidateToken(rawToken string) (*entities.Token, error) {
-	token, err := s.authRepo.ValidateToken(rawToken)
+func (s*service) ValidateToken(rawToken string) (*entities.Claims, error) {
+	claims, err := s.authRepo.ValidateToken(rawToken)
 	if err != nil {
 		return nil, err
 	}
 
-	return &entities.Token{Token: token}, nil
+	return claims, nil
 }
 
 func (s *service) GenerateTokens(userId int) (*string, *string, error) {

@@ -111,18 +111,13 @@ paths:
     securitySchemes:
       $ref: ../components/security.yaml#/bearerAuth
     get:
+      '200':
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas.yaml#/GetUserDto
       operationId: getUserInfo
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetUserDto'
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+      responses: null
 components:
   schemas:
     CreateUserDto:
@@ -155,26 +150,6 @@ components:
         - full_name
         - password
         - email
-    GetUserDto:
-      type: object
-      properties:
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
-        city:
-          type: string
-      required:
-        - full_name
-        - email
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-      required:
-        - error
     Tag:
       type: object
       properties:
@@ -205,6 +180,13 @@ components:
       required:
         - name
         - user_id
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
     CreateTaskDto:
       type: object
       properties:
@@ -224,6 +206,19 @@ components:
       required:
         - name
         - user_id
+    GetUserDto:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        city:
+          type: string
+      required:
+        - full_name
+        - email
   securitySchemes:
     bearerAuth:
       type: http

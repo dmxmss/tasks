@@ -30,7 +30,17 @@ func NewGinServer(conf *config.Config, db *gorm.DB) (*GinServer, error) {
 
 func (s *GinServer) RegisterHandlers() {
 	s.app.Use(ErrorMiddleware())
-	RegisterHandlers(s.app, s)	
+
+	RegisterHandlersWithOptions(s.app, s, GinServerOptions{
+		Middlewares: []MiddlewareFunc{
+			func(c *gin.Context) {
+				if c.Request.URL.Path == "/auth/me" {
+					s.JWTMiddleware()(c)
+				}
+				c.Next()
+			},
+		},
+	})	
 }
 
 func (s *GinServer) Start() {

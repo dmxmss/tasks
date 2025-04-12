@@ -8,6 +8,7 @@ import (
 type UserService interface {
 	CreateUser(entities.CreateUserDto) (*entities.GetUserDto, error)
 	LogIn(entities.LoginUserDto) (*entities.GetUserDto, error)
+	GetUserInfo(int) (*entities.GetUserDto, error)
 }
 
 func (us *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetUserDto, error) {
@@ -25,13 +26,26 @@ func (us *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetU
 }
 
 func (us *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, error) {
-	user, err := us.userRepo.GetUserByEmail(login.Email)
+	user, err := us.userRepo.GetUserBy(entities.SearchUserDto{Email: &login.Email})
 	if err != nil {
 		return nil, err
 	}
 
 	if user.Password != login.Password {
 		return nil, e.ErrAuthInvalidCredentials
+	}
+
+	return &entities.GetUserDto{
+		ID: user.ID,
+		FullName: user.FullName,
+		Email: user.Email,
+	}, nil
+}
+
+func (us *service) GetUserInfo(userId int) (*entities.GetUserDto, error) {
+	user, err := us.userRepo.GetUserBy(entities.SearchUserDto{ID: &userId})
+	if err != nil {
+		return nil, err
 	}
 
 	return &entities.GetUserDto{

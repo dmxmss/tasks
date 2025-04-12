@@ -9,8 +9,9 @@ const (
 	ErrDbTaskNotFound
 	ErrAuthSignatureInvalid
 	ErrAuthTokenExpired
-	ErrAuthFailed
 	ErrAuthInvalidCredentials
+	ErrAuthTokenInvalid
+	ErrAuthFailed
 	ErrInvalidRequestBody
 	ErrUserAlreadyExists
 	ErrUserNotFound
@@ -32,6 +33,8 @@ func (e Error) Error() string {
 		err = "Auth: token signature invalid"
 	case ErrAuthTokenExpired:
 		err = "Auth: token expired"
+	case ErrAuthTokenInvalid:
+		err = "Auth: token invalid"
 	case ErrAuthFailed:
 		err = "Auth: failed"
 	case ErrAuthInvalidCredentials:

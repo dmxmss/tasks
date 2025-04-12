@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: Tasks service API
+  version: 1.0.0
+
+paths:
+  /tasks:
+    $ref: './paths/tasks.yaml#/~1tasks'
+  /tasks/{id}:
+    $ref: './paths/tasks.yaml#/~1tasks~1{id}'
+  $ref: './paths/auth.yaml#/'
+
+components:
+  schemas:
+    $ref: './components/schemas.yaml'
+  securitySchemes:
+    $ref: './components/security.yaml#/'
+  responses:
+    $ref: './components/errors.yaml#/'

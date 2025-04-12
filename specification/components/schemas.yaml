@@ -1,0 +1,105 @@
+GetTaskDto:
+  type: object
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+    status:
+      type: string
+    deadline:
+      type: string
+      format: date
+    tags:
+      type: array
+      items:
+        $ref: '#/Tag'
+    weather:
+      type: string
+    user_id:
+      type: string
+  required:
+    - name
+    - user_id
+
+CreateTaskDto:
+  type: object
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+    deadline:
+      type: string
+      format: date
+    tags:
+      type: array
+      items:
+        $ref: '#/Tag'
+    user_id:
+      type: integer
+  required:
+    - name
+    - user_id
+
+CreateUserDto:
+  type: object
+  properties:
+    full_name:
+      type: string
+    email:
+      type: string
+      format: email
+    password:
+      type: string
+    city:
+      type: string
+  required:
+    - full_name
+    - email
+    - password
+
+GetUserDto:
+  type: object
+  properties:
+    full_name:
+      type: string
+    email:
+      type: string
+      format: email
+    city:
+      type: string
+  required:
+    - full_name
+    - email
+
+LoginUserDto:
+  type: object
+  properties:
+    full_name:
+      type: string
+    email:
+      type: string
+      format: email
+    password:
+      type: string
+  required:
+    - full_name
+    - password
+    - email
+
+Tag:
+  type: object
+  properties:
+    name:
+      type: string
+  required:
+    - name
+
+Error:
+  type: object
+  properties:
+    error:
+      type: string
+  required:
+    - error
