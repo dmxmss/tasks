@@ -20,6 +20,9 @@ type ServerInterface interface {
 	// (GET /auth/me)
 	GetUserInfo(c *gin.Context)
 
+	// (POST /auth/refresh)
+	UpdateTokens(c *gin.Context)
+
 	// (POST /auth/signup)
 	SignUp(c *gin.Context)
 	// Get all tasks
@@ -69,6 +72,19 @@ func (siw *ServerInterfaceWrapper) GetUserInfo(c *gin.Context) {
 	}
 
 	siw.Handler.GetUserInfo(c)
+}
+
+// UpdateTokens operation middleware
+func (siw *ServerInterfaceWrapper) UpdateTokens(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.UpdateTokens(c)
 }
 
 // SignUp operation middleware
@@ -187,6 +203,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 
 	router.POST(options.BaseURL+"/auth/login", wrapper.LogIn)
 	router.GET(options.BaseURL+"/auth/me", wrapper.GetUserInfo)
+	router.POST(options.BaseURL+"/auth/refresh", wrapper.UpdateTokens)
 	router.POST(options.BaseURL+"/auth/signup", wrapper.SignUp)
 	router.GET(options.BaseURL+"/tasks", wrapper.GetAllTasks)
 	router.POST(options.BaseURL+"/tasks", wrapper.CreateTask)

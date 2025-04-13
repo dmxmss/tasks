@@ -31,7 +31,7 @@
         content: {}
 /auth/me:
   securitySchemes:
-    $ref: "../components/security.yaml#/bearerAuth" 
+    $ref: "#/components/securitySchemes/bearerAuth" 
   get:
     operationId: getUserInfo
     responses:
@@ -40,8 +40,35 @@
           application/json:
             schema:
               $ref: "../components/schemas.yaml#/GetUserDto"
-      "403":
+      "401":
         content:
           application/json:
             schema:
               $ref: "../components/schemas.yaml#/Error"
+/auth/refresh:
+  securitySchemes:
+    $ref: "#/components/securitySchemes/bearerAuth" 
+  post:
+    description: Update tokens
+    operationId: updateTokens
+    responses:
+      "201":
+        headers:
+          access_token: 
+            description: Access token
+            schema:
+              type: string
+          refresh_token: 
+            description: Refresh token
+            schema:
+              type: string
+        description: New access and refresh token
+        content: {}
+      "401":
+        description: Missing refresh token
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/Error"
+      "500":
+        $ref: "../components/errors.yaml#/InternalServerError"

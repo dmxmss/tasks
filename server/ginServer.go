@@ -35,7 +35,9 @@ func (s *GinServer) RegisterHandlers() {
 		Middlewares: []MiddlewareFunc{
 			func(c *gin.Context) {
 				if c.Request.URL.Path == "/auth/me" {
-					s.JWTMiddleware()(c)
+					s.JWTAccessMiddleware()(c)
+				} else if c.Request.URL.Path == "/auth/refresh" {
+					s.JWTRefreshMiddleware()(c)
 				}
 				c.Next()
 			},

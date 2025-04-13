@@ -14,6 +14,7 @@ type Service interface {
 }
 
 type service struct {
+	conf *config.Config
 	tasksRepo repository.TasksRepository
 	authRepo repository.AuthRepository
 	userRepo repository.UserRepository
@@ -26,6 +27,7 @@ func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
 	userRepo := repository.NewUserRepository(db)
 
 	return &service{
+		conf: conf,
 		authRepo: authRepo,
 		tasksRepo: tasksRepo,
 		userRepo: userRepo,

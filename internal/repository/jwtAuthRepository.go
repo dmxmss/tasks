@@ -7,12 +7,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	"errors"
-	"time"
 )
 
 type AuthRepository interface {
 	ValidateToken(string) (*entities.Claims, error)
-	GenerateTokens(int) (*string, *string, error)
+	GenerateAndSignToken(entities.Claims) (*string, error)
 }
 
 type jwtAuthRepository struct {
@@ -51,51 +50,18 @@ func (jwtRepo *jwtAuthRepository) ValidateToken(rawToken string) (*entities.Clai
 	return claims, nil
 }
 
-func (jwtRepo *jwtAuthRepository) generateAccessToken(userId int) (*string, error) {
-	exp := time.Now().Add(time.Duration(jwtRepo.conf.Access.ExpirationTime)*time.Second)
-
-	claims := entities.Claims{
-		UserID: userId,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(exp),
-		},
-	}
-	_, err := claims.GetExpirationTime()
-	if err != nil {
-		panic(err)
-	}
-
-	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)
+func (jwtRepo *jwtAuthRepository) signToken(token *jwt.Token) (*string, error) {
 	signedToken, err := token.SignedString([]byte(jwtRepo.conf.JWTSecret))
 	if err != nil {
 		return nil, e.ErrTokenSigningError
 	}
+
 	return &signedToken, nil
 }
 
-func (jwtRepo *jwtAuthRepository) generateRefreshToken() (*string, error) {
-	exp := time.Now().Add(time.Duration(jwtRepo.conf.Refresh.ExpirationTime)*time.Second)
-
-	claims := jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(exp),
-	}
-
+func (jwtRepo *jwtAuthRepository) GenerateAndSignToken(claims entities.Claims) (*string, error) {
 	token := jwt.NewWithClaims(jwtRepo.conf.SigningMethod, claims)
-	signedToken, err := token.SignedString([]byte(jwtRepo.conf.JWTSecret))
-	if err != nil {
-		return nil, e.ErrTokenSigningError
-	}
-	return &signedToken, nil
-}
+	signedToken, err := jwtRepo.signToken(token)
 
-func (jwtRepo *jwtAuthRepository) GenerateTokens(userId int) (*string, *string, error) {
-	accessToken, err := jwtRepo.generateAccessToken(userId)
-	if err != nil {
-		return nil, nil, err
-	}
-	refreshToken, err := jwtRepo.generateRefreshToken()
-	if err != nil {
-		return nil, nil, err
-	}
-	return accessToken, refreshToken, nil
+	return signedToken, err
 }

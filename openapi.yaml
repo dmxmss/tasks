@@ -76,16 +76,6 @@ paths:
                 $ref: '#/components/schemas/Error'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /auth/signup:
-    post:
-      description: Create a user
-      operationId: signUp
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateUserDto'
   /auth/login:
     post:
       operationId: logIn
@@ -107,9 +97,19 @@ paths:
               schema:
                 type: string
           content: {}
+  /auth/signup:
+    post:
+      description: Create a user
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
   /auth/me:
     securitySchemes:
-      $ref: ../components/security.yaml#/bearerAuth
+      $ref: '#/components/securitySchemes/bearerAuth'
     get:
       operationId: getUserInfo
       responses:
@@ -118,63 +118,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetUserDto'
-        '403':
+        '401':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /auth/refresh:
+    securitySchemes:
+      $ref: '#/components/securitySchemes/bearerAuth'
+    post:
+      description: Update tokens
+      operationId: updateTokens
+      responses:
+        '201':
+          headers:
+            access_token:
+              description: Access token
+              schema:
+                type: string
+            refresh_token:
+              description: Refresh token
+              schema:
+                type: string
+          description: New access and refresh token
+          content: {}
+        '401':
+          description: Missing refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    CreateUserDto:
-      type: object
-      properties:
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-        city:
-          type: string
-      required:
-        - full_name
-        - email
-        - password
-    LoginUserDto:
-      type: object
-      properties:
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-      required:
-        - full_name
-        - password
-        - email
-    GetUserDto:
-      type: object
-      properties:
-        full_name:
-          type: string
-        email:
-          type: string
-          format: email
-        city:
-          type: string
-      required:
-        - full_name
-        - email
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-      required:
-        - error
     Tag:
       type: object
       properties:
@@ -205,6 +182,13 @@ components:
       required:
         - name
         - user_id
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
     CreateTaskDto:
       type: object
       properties:
@@ -224,6 +208,49 @@ components:
       required:
         - name
         - user_id
+    LoginUserDto:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - full_name
+        - password
+        - email
+    CreateUserDto:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        city:
+          type: string
+      required:
+        - full_name
+        - email
+        - password
+    GetUserDto:
+      type: object
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        city:
+          type: string
+      required:
+        - full_name
+        - email
   securitySchemes:
     bearerAuth:
       type: http

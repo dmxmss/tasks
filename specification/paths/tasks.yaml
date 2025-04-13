@@ -33,7 +33,6 @@
                   type: integer
       "500":
         $ref: '../components/errors.yaml#/InternalServerError'
-
 /tasks/{id}:
   parameters:
     - in: path

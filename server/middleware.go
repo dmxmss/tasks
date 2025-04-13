@@ -43,7 +43,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (s *GinServer) JWTMiddleware() gin.HandlerFunc {
+func (s *GinServer) JWTAccessMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -71,6 +71,25 @@ func (s *GinServer) JWTMiddleware() gin.HandlerFunc {
 
 		c.Set("claims", claims)
 		
+		c.Next()
+	}
+}
+
+func (s *GinServer) JWTRefreshMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		refresh, err := c.Cookie("refresh_token")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "missing refresh token"})
+			return
+		}
+
+		claims, err := s.service.ValidateToken(refresh)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "token is invalid"})
+			return
+		}
+
+		c.Set("claims", claims)
 		c.Next()
 	}
 }
