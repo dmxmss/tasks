@@ -13,6 +13,7 @@ type (
 		App *App
 		Database *Database
 		Auth *Auth
+		Hash *Hash
 	}
 
 	App struct {
@@ -37,6 +38,10 @@ type (
 
 	Token struct {
 		ExpirationTime int
+	}
+
+	Hash struct {
+		Cost int
 	}
 )
 
@@ -65,6 +70,8 @@ func GetConfig() *Config {
 		viper.SetDefault("auth.access.expirationtime", 60*60)
 		viper.SetDefault("auth.refresh.expirationtime", 60*60*24*7)
 		viper.SetDefault("auth.signingmethod", jwt.SigningMethodHS256)
+
+		viper.SetDefault("hash.cost", 10)
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)

@@ -25,7 +25,7 @@ func (ur *userRepository) CreateUser(createUser entities.CreateUserDto) (*entiti
 	user := entities.User{
 		FullName: createUser.FullName,
 		Email: createUser.Email,
-		Password: createUser.Password, // TODO hashing
+		Password: createUser.Password,
 		City: createUser.City,
 	}
 

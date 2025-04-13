@@ -12,6 +12,7 @@ const (
 	ErrAuthInvalidCredentials
 	ErrAuthTokenInvalid
 	ErrAuthFailed
+	ErrHashingFailed
 	ErrInvalidRequestBody
 	ErrUserAlreadyExists
 	ErrUserNotFound
@@ -39,6 +40,8 @@ func (e Error) Error() string {
 		err = "Auth: failed"
 	case ErrAuthInvalidCredentials:
 		err = "Auth: invalid credentials"
+	case ErrHashingFailed:
+		err = "Hashing failed"
 	case ErrInvalidRequestBody:
 		err = "Invalid request body"
 	case ErrUserAlreadyExists:

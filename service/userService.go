@@ -11,8 +11,14 @@ type UserService interface {
 	GetUserInfo(int) (*entities.GetUserDto, error)
 }
 
-func (us *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetUserDto, error) {
-	user, err := us.userRepo.CreateUser(createUser)
+func (s *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetUserDto, error) {
+	hashedPassword, err := s.hashRepo.HashPassword(createUser.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	createUser.Password = hashedPassword
+	user, err := s.userRepo.CreateUser(createUser)
 	if err != nil {
 		return nil, err
 	}
@@ -25,13 +31,13 @@ func (us *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetU
 	}, nil
 }
 
-func (us *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, error) {
-	user, err := us.userRepo.GetUserBy(entities.SearchUserDto{Email: &login.Email})
+func (s *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, error) {
+	user, err := s.userRepo.GetUserBy(entities.SearchUserDto{Email: &login.Email})
 	if err != nil {
 		return nil, err
 	}
 
-	if user.Password != login.Password {
+	if !s.hashRepo.IsPasswordValid(login.Password, user.Password) {
 		return nil, e.ErrAuthInvalidCredentials
 	}
 
@@ -42,8 +48,8 @@ func (us *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, err
 	}, nil
 }
 
-func (us *service) GetUserInfo(userId int) (*entities.GetUserDto, error) {
-	user, err := us.userRepo.GetUserBy(entities.SearchUserDto{ID: &userId})
+func (s *service) GetUserInfo(userId int) (*entities.GetUserDto, error) {
+	user, err := s.userRepo.GetUserBy(entities.SearchUserDto{ID: &userId})
 	if err != nil {
 		return nil, err
 	}
