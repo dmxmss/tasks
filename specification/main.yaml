@@ -22,3 +22,5 @@ components:
     $ref: './components/schemas.yaml'
   securitySchemes:
     $ref: './components/security.yaml#/BearerAuth'
+  parameters:
+    $ref: './components/parameters.yaml#/'

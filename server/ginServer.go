@@ -3,12 +3,15 @@ package server
 import (
 	"github.com/dmxmss/tasks/config"
 	"github.com/dmxmss/tasks/service"
+	"github.com/dmxmss/tasks/entities"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"fmt"
 	"strings"
 )
+
+type GetUserTasksParams = entities.SearchTasksParams
 
 type GinServer struct {
 	app *gin.Engine

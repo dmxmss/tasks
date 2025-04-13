@@ -6,14 +6,14 @@ import (
 )
 
 type TasksService interface {
-	GetUserTasks(int) ([]entities.GetTaskDto, error)
+	GetUserTasks(int, *entities.SearchTasksParams) ([]entities.GetTaskDto, error)
 	CreateTask(int, entities.CreateTaskDto) (*entities.GetTaskDto, error)
 	PatchTask(entities.PatchTaskDto) (*entities.GetTaskDto, error)
 	DeleteTask(int) error
 }
 
-func (ts *service) GetUserTasks(id int) ([]entities.GetTaskDto, error) {
-	tasks, err := ts.tasksRepo.GetUserTasks(id)
+func (ts *service) GetUserTasks(id int, params *entities.SearchTasksParams) ([]entities.GetTaskDto, error) {
+	tasks, err := ts.tasksRepo.GetUserTasks(id, params)
 	if err != nil {
 		return nil, err
 	}

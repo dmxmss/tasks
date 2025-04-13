@@ -26,6 +26,8 @@ func main() {
 		panic(err)
 	}
 
+	db = db.Debug()
+
 	s, err := server.NewGinServer(conf, db)
 	if err != nil {
 		panic(err)

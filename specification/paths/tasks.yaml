@@ -1,7 +1,10 @@
 /tasks:
   get:
-    summary: Get all tasks
+    summary: Get user tasks with optional filters
     operationId: getUserTasks
+    parameters:
+      - $ref: "../components/parameters.yaml#/Status"
+      - $ref: "../components/parameters.yaml#/Deadline"
     responses:
       "200":
         description: A list of all tasks

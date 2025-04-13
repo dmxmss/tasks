@@ -1,0 +1,15 @@
+Status:
+  in: query
+  name: status
+  description: Search tasks with given status
+  required: false
+  schema: 
+    type: string
+Deadline:
+  in: query
+  name: deadline
+  description: Search tasks by its deadline
+  required: false
+  schema:
+    type: string
+    format: date

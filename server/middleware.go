@@ -33,6 +33,9 @@ func ErrorMiddleware() gin.HandlerFunc {
 			case e.ErrAuthInvalidCredentials:
 				err.Error = "invalid credentials"
 				statusCode = http.StatusUnauthorized
+			case e.ErrInvalidRequestBody:
+				err.Error = "invalid request body"
+				statusCode = http.StatusBadRequest
 			default:
 				err.Error = "internal server error"
 				statusCode = http.StatusInternalServerError

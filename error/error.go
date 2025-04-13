@@ -16,6 +16,7 @@ const (
 	ErrInvalidRequestBody
 	ErrUserAlreadyExists
 	ErrUserNotFound
+	ErrUserTasksNotFound
 	ErrTokenSigningError
 )
 
@@ -48,6 +49,8 @@ func (e Error) Error() string {
 		err = "User already exists"
 	case ErrUserNotFound:
 		err = "User not found"
+	case ErrUserTasksNotFound:
+		err = "User tasks not found"
 	case ErrTokenSigningError:
 		err = "Token signing error"
 	}

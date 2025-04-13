@@ -25,9 +25,9 @@ type ServerInterface interface {
 
 	// (POST /auth/signup)
 	SignUp(c *gin.Context)
-	// Get all tasks
+	// Get user tasks with optional filters
 	// (GET /tasks)
-	GetUserTasks(c *gin.Context)
+	GetUserTasks(c *gin.Context, params GetUserTasksParams)
 	// Create a new task
 	// (POST /tasks)
 	CreateTask(c *gin.Context)
@@ -103,6 +103,27 @@ func (siw *ServerInterfaceWrapper) SignUp(c *gin.Context) {
 // GetUserTasks operation middleware
 func (siw *ServerInterfaceWrapper) GetUserTasks(c *gin.Context) {
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUserTasksParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "status", c.Request.URL.Query(), &params.Status)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter status: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	// ------------- Optional query parameter "deadline" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "deadline", c.Request.URL.Query(), &params.Deadline)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter deadline: %w", err), http.StatusBadRequest)
+		return
+	}
+
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 		if c.IsAborted() {
@@ -110,7 +131,7 @@ func (siw *ServerInterfaceWrapper) GetUserTasks(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetUserTasks(c)
+	siw.Handler.GetUserTasks(c, params)
 }
 
 // CreateTask operation middleware

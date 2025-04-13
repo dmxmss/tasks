@@ -8,6 +8,7 @@ import (
 func ToGetTaskDto(task *entities.Task) entities.GetTaskDto {
 	return entities.GetTaskDto{
 			ID: task.ID,
+			CreatedAt: task.CreatedAt,
 			Name: task.Name,
 			Description: task.Description,
 			Status: task.Status,

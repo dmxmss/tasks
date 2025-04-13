@@ -1,20 +1,22 @@
 package server
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/dmxmss/tasks/entities"
 	e "github.com/dmxmss/tasks/error"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
-func (s *GinServer) GetUserTasks(c *gin.Context) {
+func (s *GinServer) GetUserTasks(c *gin.Context, params GetUserTasksParams) {
 	claims, err := s.getClaims(c)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	tasks, err := s.service.GetUserTasks(claims.UserID)
+	tasks, err := s.service.GetUserTasks(claims.UserID, &params)
 	if err != nil {
 		c.Error(err)
 		return
@@ -49,11 +51,12 @@ func (s *GinServer) CreateTask(c *gin.Context) {
 
 func (s *GinServer) PatchTask(c *gin.Context, id int) {
 	var patchTask entities.PatchTaskDto
+	patchTask.ID = id
 	if err := c.ShouldBindJSON(&patchTask); err != nil {
+		log.Printf("%s", err)
 		c.Error(e.ErrInvalidRequestBody)
 		return
 	}
-	patchTask.ID = id
 	
 	task, err := s.service.PatchTask(patchTask)
 	if err != nil {

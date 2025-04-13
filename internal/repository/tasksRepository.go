@@ -10,7 +10,7 @@ import (
 )
 
 type TasksRepository interface {
-	GetUserTasks(int) ([]entities.Task, error)
+	GetUserTasks(int, *entities.SearchTasksParams) ([]entities.Task, error)
 	CreateTask(int, entities.CreateTaskDto) (*entities.Task, error)
 	PatchTask(entities.PatchTaskDto) (*entities.Task, error)
 	DeleteTask(int) error
@@ -25,11 +25,20 @@ func NewTasksRepository(db *gorm.DB) TasksRepository {
 	return &TasksPostgresRepo{db}
 }
 
-func (t *TasksPostgresRepo) GetUserTasks(id int) ([]entities.Task, error) {
+func (t *TasksPostgresRepo) GetUserTasks(id int, params *entities.SearchTasksParams) ([]entities.Task, error) {
 	var tasks []entities.Task
-	if err := t.db.Where("user_id = ?", id).Find(&tasks).Error; err != nil {
+	query := t.db.Where("user_id = ?", id)
+
+	if params.Status != nil {
+		query = query.Where("status = ?", *params.Status)
+	}
+	if params.Deadline != nil {
+		query = query.Where("deadline <= ?", *params.Deadline)
+	}
+
+	if err := query.Find(&tasks).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, e.ErrUserNotFound
+			return nil, e.ErrUserTasksNotFound
 		} else {
 			return nil, e.ErrDbTransactionFailed
 		}
