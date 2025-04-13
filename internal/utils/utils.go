@@ -24,7 +24,6 @@ func FromCreateTaskDto(createTask entities.CreateTaskDto) entities.Task {
 		Description: createTask.Description,
 		Deadline: createTask.Deadline,
 		Tags: createTask.Tags,
-		UserID: createTask.UserID,
 	}
 }
 

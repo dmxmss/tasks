@@ -6,14 +6,14 @@ import (
 )
 
 type TasksService interface {
-	GetAllTasks() ([]entities.GetTaskDto, error)
-	CreateTask(entities.CreateTaskDto) (*entities.GetTaskDto, error)
+	GetUserTasks(int) ([]entities.GetTaskDto, error)
+	CreateTask(int, entities.CreateTaskDto) (*entities.GetTaskDto, error)
 	PatchTask(entities.PatchTaskDto) (*entities.GetTaskDto, error)
 	DeleteTask(int) error
 }
 
-func (ts *service) GetAllTasks() ([]entities.GetTaskDto, error) {
-	tasks, err := ts.tasksRepo.GetAllTasks()
+func (ts *service) GetUserTasks(id int) ([]entities.GetTaskDto, error) {
+	tasks, err := ts.tasksRepo.GetUserTasks(id)
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +27,8 @@ func (ts *service) GetAllTasks() ([]entities.GetTaskDto, error) {
 	return result, err
 }
 
-func (ts *service) CreateTask(createTask entities.CreateTaskDto) (*entities.GetTaskDto, error) {
-	task, err := ts.tasksRepo.CreateTask(createTask)
+func (ts *service) CreateTask(userId int, createTask entities.CreateTaskDto) (*entities.GetTaskDto, error) {
+	task, err := ts.tasksRepo.CreateTask(userId, createTask)
 	if err != nil {
 		return nil, err
 	}

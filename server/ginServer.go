@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"fmt"
+	"strings"
 )
 
 type GinServer struct {
@@ -34,9 +35,10 @@ func (s *GinServer) RegisterHandlers() {
 	RegisterHandlersWithOptions(s.app, s, GinServerOptions{
 		Middlewares: []MiddlewareFunc{
 			func(c *gin.Context) {
-				if c.Request.URL.Path == "/auth/me" {
+				path := c.Request.URL.Path
+				if path == "/auth/me" || strings.HasPrefix(path, "/tasks") {
 					s.JWTAccessMiddleware()(c)
-				} else if c.Request.URL.Path == "/auth/refresh" {
+				} else if path == "/auth/refresh" {
 					s.JWTRefreshMiddleware()(c)
 				}
 				c.Next()

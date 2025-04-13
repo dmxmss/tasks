@@ -9,5 +9,4 @@ type CreateTaskDto struct {
 	Description *string `json:"description,omitempty"`
 	Deadline *time.Time `json:"deadline"`
 	Tags []Tag `json:"tags,omitempty"`
-	UserID uint `json:"user_id"`
 }

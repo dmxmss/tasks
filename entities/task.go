@@ -12,6 +12,6 @@ type Task struct {
 	Deadline *time.Time
 	Tags []Tag `gorm:"many2many:task_tags"`
 	Weather *string
-	UserID uint
+	UserID int
 	User User `gorm:"constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 }

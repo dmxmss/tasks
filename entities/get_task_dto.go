@@ -12,5 +12,5 @@ type GetTaskDto struct {
 	Deadline *time.Time `json:"deadline,omitempty"`
 	Tags []Tag `json:"tags,omitempty"`
 	Weather *string `json:"weather,omitempty"`
-	UserID uint `json:"user_id"`
+	UserID int `json:"user_id"`
 }

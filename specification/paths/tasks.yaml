@@ -1,7 +1,7 @@
 /tasks:
   get:
     summary: Get all tasks
-    operationId: getAllTasks
+    operationId: getUserTasks
     responses:
       "200":
         description: A list of all tasks

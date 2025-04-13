@@ -7,8 +7,14 @@ import (
 	"net/http"
 )
 
-func (s *GinServer) GetAllTasks(c *gin.Context) {
-	tasks, err := s.service.GetAllTasks()
+func (s *GinServer) GetUserTasks(c *gin.Context) {
+	claims, err := s.getClaims(c)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	tasks, err := s.service.GetUserTasks(claims.UserID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -18,14 +24,21 @@ func (s *GinServer) GetAllTasks(c *gin.Context) {
 }
 
 func (s *GinServer) CreateTask(c *gin.Context) {
+	claims, err := s.getClaims(c)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	var createTask entities.CreateTaskDto
-	err := c.ShouldBindJSON(&createTask)
+
+	err = c.ShouldBindJSON(&createTask)
 	if err != nil {
 		c.Error(e.ErrInvalidRequestBody)
 		return
 	}
 
-	task, err := s.service.CreateTask(createTask)
+	task, err := s.service.CreateTask(claims.UserID, createTask)
 	if err != nil {
 		c.Error(err)
 		return

@@ -27,7 +27,7 @@ type ServerInterface interface {
 	SignUp(c *gin.Context)
 	// Get all tasks
 	// (GET /tasks)
-	GetAllTasks(c *gin.Context)
+	GetUserTasks(c *gin.Context)
 	// Create a new task
 	// (POST /tasks)
 	CreateTask(c *gin.Context)
@@ -100,8 +100,8 @@ func (siw *ServerInterfaceWrapper) SignUp(c *gin.Context) {
 	siw.Handler.SignUp(c)
 }
 
-// GetAllTasks operation middleware
-func (siw *ServerInterfaceWrapper) GetAllTasks(c *gin.Context) {
+// GetUserTasks operation middleware
+func (siw *ServerInterfaceWrapper) GetUserTasks(c *gin.Context) {
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -110,7 +110,7 @@ func (siw *ServerInterfaceWrapper) GetAllTasks(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetAllTasks(c)
+	siw.Handler.GetUserTasks(c)
 }
 
 // CreateTask operation middleware
@@ -205,7 +205,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	router.GET(options.BaseURL+"/auth/me", wrapper.GetUserInfo)
 	router.POST(options.BaseURL+"/auth/refresh", wrapper.UpdateTokens)
 	router.POST(options.BaseURL+"/auth/signup", wrapper.SignUp)
-	router.GET(options.BaseURL+"/tasks", wrapper.GetAllTasks)
+	router.GET(options.BaseURL+"/tasks", wrapper.GetUserTasks)
 	router.POST(options.BaseURL+"/tasks", wrapper.CreateTask)
 	router.DELETE(options.BaseURL+"/tasks/:id", wrapper.DeleteTask)
 	router.PATCH(options.BaseURL+"/tasks/:id", wrapper.PatchTask)

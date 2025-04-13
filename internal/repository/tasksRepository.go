@@ -10,8 +10,8 @@ import (
 )
 
 type TasksRepository interface {
-	GetAllTasks() ([]entities.Task, error)
-	CreateTask(entities.CreateTaskDto) (*entities.Task, error)
+	GetUserTasks(int) ([]entities.Task, error)
+	CreateTask(int, entities.CreateTaskDto) (*entities.Task, error)
 	PatchTask(entities.PatchTaskDto) (*entities.Task, error)
 	DeleteTask(int) error
 	GetDb() *gorm.DB
@@ -25,18 +25,22 @@ func NewTasksRepository(db *gorm.DB) TasksRepository {
 	return &TasksPostgresRepo{db}
 }
 
-func (t *TasksPostgresRepo) GetAllTasks() ([]entities.Task, error) {
+func (t *TasksPostgresRepo) GetUserTasks(id int) ([]entities.Task, error) {
 	var tasks []entities.Task
-	result := t.db.Find(&tasks)
-	if result.Error != nil {
-		return nil, e.ErrDbTransactionFailed
+	if err := t.db.Where("user_id = ?", id).Find(&tasks).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, e.ErrUserNotFound
+		} else {
+			return nil, e.ErrDbTransactionFailed
+		}
 	}
 
 	return tasks, nil
 }
 
-func (t *TasksPostgresRepo) CreateTask(createTask entities.CreateTaskDto) (*entities.Task, error) {
+func (t *TasksPostgresRepo) CreateTask(userId int, createTask entities.CreateTaskDto) (*entities.Task, error) {
 	task := u.FromCreateTaskDto(createTask)
+	task.UserID = userId
 
 	err := t.db.Create(&task).Error
 	if err != nil {
