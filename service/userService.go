@@ -45,6 +45,7 @@ func (s *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, erro
 		ID: user.ID,
 		FullName: user.FullName,
 		Email: user.Email,
+		City: user.City,
 	}, nil
 }
 
@@ -58,5 +59,6 @@ func (s *service) GetUserInfo(userId int) (*entities.GetUserDto, error) {
 		ID: user.ID,
 		FullName: user.FullName,
 		Email: user.Email,
+		City: user.City,
 	}, nil
 }

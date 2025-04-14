@@ -3,6 +3,9 @@ package utils
 import (
 	"github.com/dmxmss/tasks/entities"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+
+	"time"
 )
 
 func ToGetTaskDto(task *entities.Task) entities.GetTaskDto {
@@ -48,4 +51,14 @@ func WriteTokenToCookies(c *gin.Context, accessToken, refreshToken string, acces
 		true, 
 		true,
 	)
+}
+
+func GetClaims(userId int, city string, expirationTime int) entities.Claims {
+	return entities.Claims{
+		UserID: userId,
+		City: city,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expirationTime)*time.Second)),
+		},
+	}
 }

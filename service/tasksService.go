@@ -7,7 +7,7 @@ import (
 
 type TasksService interface {
 	GetUserTasks(int, *entities.SearchTasksParams) ([]entities.GetTaskDto, error)
-	CreateTask(int, entities.CreateTaskDto) (*entities.GetTaskDto, error)
+	CreateTask(int, string, entities.CreateTaskDto) (*entities.GetTaskDto, error)
 	PatchTask(entities.PatchTaskDto) (*entities.GetTaskDto, error)
 	DeleteTask(int) error
 }
@@ -27,8 +27,19 @@ func (ts *service) GetUserTasks(id int, params *entities.SearchTasksParams) ([]e
 	return result, err
 }
 
-func (ts *service) CreateTask(userId int, createTask entities.CreateTaskDto) (*entities.GetTaskDto, error) {
-	task, err := ts.tasksRepo.CreateTask(userId, createTask)
+func (ts *service) CreateTask(userId int, city string, createTask entities.CreateTaskDto) (*entities.GetTaskDto, error) {
+	var weather string
+
+	if city != "" {
+		weatherResponse, err := ts.weatherRepo.GetCurrentWeatherAt(city)
+		if err != nil {
+			return nil, err
+		}
+
+		weather = weatherResponse.String()
+	}
+
+	task, err := ts.tasksRepo.CreateTask(userId, weather, createTask)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +48,6 @@ func (ts *service) CreateTask(userId int, createTask entities.CreateTaskDto) (*e
 
 	return &result, nil
 }
-
 
 func (ts *service) PatchTask(patchTask entities.PatchTaskDto) (*entities.GetTaskDto, error) {
 	task, err := ts.tasksRepo.PatchTask(patchTask)

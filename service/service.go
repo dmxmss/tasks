@@ -19,6 +19,7 @@ type service struct {
 	authRepo repository.AuthRepository
 	userRepo repository.UserRepository
 	hashRepo repository.HashRepository
+	weatherRepo repository.WeatherRepository
 }
 
 func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
@@ -27,6 +28,7 @@ func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
 	authRepo := repository.NewAuthRepository(conf.Auth)
 	userRepo := repository.NewUserRepository(db)
 	hashRepo := repository.NewHashRepository(conf.Hash)
+	weatherRepo := repository.NewWeatherRepository(conf.Weather)
 
 	return &service{
 		conf: conf,
@@ -34,5 +36,6 @@ func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
 		tasksRepo: tasksRepo,
 		userRepo: userRepo,
 		hashRepo: hashRepo,
+		weatherRepo: weatherRepo,
 	}, nil
 }

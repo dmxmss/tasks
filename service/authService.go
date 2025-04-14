@@ -2,15 +2,13 @@ package service
 
 import (
 	"github.com/dmxmss/tasks/entities"
-	"github.com/golang-jwt/jwt/v5"
-	
-	"time"
+	u "github.com/dmxmss/tasks/internal/utils"
 )
 
 type AuthService interface {
 	ValidateToken(string) (*entities.Claims, error)
-	GenerateToken(int, int) (*string, error)
-	GenerateTokens(int) (*string, *string, error)
+	GenerateToken(int, string, int) (*string, error)
+	GenerateTokens(int, string) (*string, *string, error)
 }
 
 func (s *service) ValidateToken(rawToken string) (*entities.Claims, error) {
@@ -22,20 +20,20 @@ func (s *service) ValidateToken(rawToken string) (*entities.Claims, error) {
 	return claims, nil
 }
 
-func (s *service) GenerateToken(userId, expirationTime int) (*string, error) {
-	claims := s.getClaims(userId, expirationTime)
+func (s *service) GenerateToken(userId int, city string, expirationTime int) (*string, error) {
+	claims := u.GetClaims(userId, city, expirationTime)
 	token, err := s.authRepo.GenerateAndSignToken(claims)
 
 	return token, err
 }
 
-func (s *service) GenerateTokens(userId int) (*string, *string, error) {
-	access, err := s.GenerateToken(userId, s.conf.Auth.Access.ExpirationTime)
+func (s *service) GenerateTokens(userId int, city string) (*string, *string, error) {
+	access, err := s.GenerateToken(userId, city, s.conf.Auth.Access.ExpirationTime)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	refresh, err := s.GenerateToken(userId, s.conf.Auth.Refresh.ExpirationTime)
+	refresh, err := s.GenerateToken(userId, city, s.conf.Auth.Refresh.ExpirationTime)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -43,11 +41,3 @@ func (s *service) GenerateTokens(userId int) (*string, *string, error) {
 	return access, refresh, nil
 }
 
-func (s *service) getClaims(userId, expirationTime int) entities.Claims {
-	return entities.Claims{
-		UserID: userId,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expirationTime)*time.Second)),
-		},
-	}
-}

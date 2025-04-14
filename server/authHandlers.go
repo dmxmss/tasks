@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"net/http"
-	"log"
 )
 
 func (s *GinServer) SignUp(c *gin.Context) {
@@ -24,7 +23,7 @@ func (s *GinServer) SignUp(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := s.service.GenerateTokens(user.ID)
+	accessToken, refreshToken, err := s.service.GenerateTokens(user.ID, user.City)
 	if err != nil {
 		c.Error(err)
 		return
@@ -49,7 +48,7 @@ func (s *GinServer) LogIn(c *gin.Context) {
 		return
 	}
 	
-	access, refresh, err := s.service.GenerateTokens(user.ID)
+	access, refresh, err := s.service.GenerateTokens(user.ID, user.City)
 	if err != nil {
 		c.Error(err)
 		return
@@ -84,7 +83,7 @@ func (s *GinServer) UpdateTokens(c *gin.Context) {
 		return
 	}
 
-	access, refresh, err := s.service.GenerateTokens(claims.UserID)
+	access, refresh, err := s.service.GenerateTokens(claims.UserID, claims.City)
 	if err != nil {
 		c.Error(err)
 		return
@@ -96,13 +95,3 @@ func (s *GinServer) UpdateTokens(c *gin.Context) {
 													 s.conf.Auth.Refresh.ExpirationTime)
 }
 
-func (s *GinServer) getClaims(c *gin.Context) (*entities.Claims, error) {
-	v, exists := c.Get("claims")
-	claims, ok := v.(*entities.Claims)
-
-	if !ok || !exists {
-		log.Printf("Error: missing claims")
-		return nil, e.ErrAuthFailed
-	}
-	return claims, nil
-}

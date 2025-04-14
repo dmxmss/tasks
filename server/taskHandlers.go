@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/dmxmss/tasks/entities"
@@ -40,7 +39,7 @@ func (s *GinServer) CreateTask(c *gin.Context) {
 		return
 	}
 
-	task, err := s.service.CreateTask(claims.UserID, createTask)
+	task, err := s.service.CreateTask(claims.UserID, claims.City, createTask)
 	if err != nil {
 		c.Error(err)
 		return
@@ -53,7 +52,6 @@ func (s *GinServer) PatchTask(c *gin.Context, id int) {
 	var patchTask entities.PatchTaskDto
 	patchTask.ID = id
 	if err := c.ShouldBindJSON(&patchTask); err != nil {
-		log.Printf("%s", err)
 		c.Error(e.ErrInvalidRequestBody)
 		return
 	}

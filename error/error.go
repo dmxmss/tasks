@@ -18,6 +18,8 @@ const (
 	ErrUserNotFound
 	ErrUserTasksNotFound
 	ErrTokenSigningError
+	ErrGetWeatherFailed
+	ErrCityNotFound
 )
 
 func (e Error) Error() string {
@@ -53,6 +55,10 @@ func (e Error) Error() string {
 		err = "User tasks not found"
 	case ErrTokenSigningError:
 		err = "Token signing error"
+	case ErrGetWeatherFailed:
+		err = "Failed getting weather"
+	case ErrCityNotFound:
+		err = "City not found"
 	}
 
 	return err

@@ -11,7 +11,7 @@ import (
 
 type TasksRepository interface {
 	GetUserTasks(int, *entities.SearchTasksParams) ([]entities.Task, error)
-	CreateTask(int, entities.CreateTaskDto) (*entities.Task, error)
+	CreateTask(int, string, entities.CreateTaskDto) (*entities.Task, error)
 	PatchTask(entities.PatchTaskDto) (*entities.Task, error)
 	DeleteTask(int) error
 	GetDb() *gorm.DB
@@ -47,9 +47,10 @@ func (t *TasksPostgresRepo) GetUserTasks(id int, params *entities.SearchTasksPar
 	return tasks, nil
 }
 
-func (t *TasksPostgresRepo) CreateTask(userId int, createTask entities.CreateTaskDto) (*entities.Task, error) {
+func (t *TasksPostgresRepo) CreateTask(userId int, weather string, createTask entities.CreateTaskDto) (*entities.Task, error) {
 	task := u.FromCreateTaskDto(createTask)
 	task.UserID = userId
+	task.Weather = weather
 
 	err := t.db.Create(&task).Error
 	if err != nil {

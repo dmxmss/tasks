@@ -2,3 +2,6 @@
 *Dockerfile
 docker-compose.yaml
 .dockerignore
+
+# api keys
+.env

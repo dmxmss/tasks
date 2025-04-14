@@ -14,6 +14,7 @@ type (
 		Database *Database
 		Auth *Auth
 		Hash *Hash
+		Weather *Weather
 	}
 
 	App struct {
@@ -42,6 +43,11 @@ type (
 
 	Hash struct {
 		Cost int
+	}
+
+	Weather struct {
+		Key string
+		URL string
 	}
 )
 
@@ -72,6 +78,8 @@ func GetConfig() *Config {
 		viper.SetDefault("auth.signingmethod", jwt.SigningMethodHS256)
 
 		viper.SetDefault("hash.cost", 10)
+
+		viper.SetDefault("weather.key", "")
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)
