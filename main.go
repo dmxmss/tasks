@@ -3,11 +3,13 @@ package main
 import (
 	"github.com/dmxmss/tasks/server"
 	"github.com/dmxmss/tasks/config"
+	"github.com/redis/go-redis/v9"
 
 	"gorm.io/gorm"
 	"gorm.io/driver/postgres"
 
 	"fmt"
+	"context"
 )
 
 func main() {
@@ -28,7 +30,13 @@ func main() {
 
 	db = db.Debug()
 
-	s, err := server.NewGinServer(conf, db)
+	ctx := context.Background()
+	client := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", conf.Redis.Host, conf.Redis.Port),
+		DB: conf.Redis.DB,
+	})
+
+	s, err := server.NewGinServer(conf, db, ctx, client)
 	if err != nil {
 		panic(err)
 	}

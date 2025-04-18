@@ -3,39 +3,35 @@ package service
 import (
 	"github.com/dmxmss/tasks/internal/repository"
 	"github.com/dmxmss/tasks/config"
+	"github.com/redis/go-redis/v9"
 
 	"gorm.io/gorm"
+	"context"
 )
 
-type Service interface {
-	TasksService
-	AuthService
-	UserService
-}
-
-type service struct {
+type Service struct {
 	conf *config.Config
-	tasksRepo repository.TasksRepository
-	authRepo repository.AuthRepository
-	userRepo repository.UserRepository
-	hashRepo repository.HashRepository
-	weatherRepo repository.WeatherRepository
+	TasksService TasksService
+	AuthService AuthService
+	UserService UserService
 }
 
-func NewService(conf *config.Config, db *gorm.DB) (Service, error) {
+func NewService(conf *config.Config, db *gorm.DB, ctx context.Context, redisClient *redis.Client) (*Service, error) {
 	tasksRepo := repository.NewTasksRepository(db)
-
 	authRepo := repository.NewAuthRepository(conf.Auth)
 	userRepo := repository.NewUserRepository(db)
 	hashRepo := repository.NewHashRepository(conf.Hash)
 	weatherRepo := repository.NewWeatherRepository(conf.Weather)
+	cachingRepo := repository.NewCachingRepository(ctx, redisClient)
 
-	return &service{
+	tasksService := NewTaskService(conf.Redis, tasksRepo, weatherRepo, cachingRepo)
+	authService := NewAuthService(conf.Auth, authRepo)
+	userService := NewUserService(userRepo, hashRepo)
+
+	return &Service{
 		conf: conf,
-		authRepo: authRepo,
-		tasksRepo: tasksRepo,
-		userRepo: userRepo,
-		hashRepo: hashRepo,
-		weatherRepo: weatherRepo,
+		TasksService: tasksService,
+		AuthService: authService,
+		UserService: userService,
 	}, nil
 }

@@ -60,7 +60,7 @@ func (s *GinServer) JWTAccessMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := s.service.ValidateToken(rawToken)
+		claims, err := s.service.AuthService.ValidateToken(rawToken)
 		if err != nil {
 			if errors.Is(err, e.ErrAuthTokenExpired) {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "token expired"})
@@ -86,7 +86,7 @@ func (s *GinServer) JWTRefreshMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := s.service.ValidateToken(refresh)
+		claims, err := s.service.AuthService.ValidateToken(refresh)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, entities.Error{Error: "token is invalid"})
 			return

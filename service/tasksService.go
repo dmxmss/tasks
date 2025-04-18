@@ -2,7 +2,13 @@ package service
 
 import (
 	u "github.com/dmxmss/tasks/internal/utils"
+	"github.com/dmxmss/tasks/config"
+	e "github.com/dmxmss/tasks/error"
+	"github.com/dmxmss/tasks/internal/repository"
 	"github.com/dmxmss/tasks/entities"
+
+	"strconv"
+	"encoding/json"
 )
 
 type TasksService interface {
@@ -12,8 +18,44 @@ type TasksService interface {
 	DeleteTask(int) error
 }
 
-func (ts *service) GetUserTasks(id int, params *entities.SearchTasksParams) ([]entities.GetTaskDto, error) {
-	tasks, err := ts.tasksRepo.GetUserTasks(id, params)
+type taskService struct {
+	conf *config.Redis
+	tasksRepo repository.TasksRepository
+	weatherRepo repository.WeatherRepository
+	cachingRepo repository.CachingRepository
+}
+
+func NewTaskService(conf *config.Redis, tasksRepo repository.TasksRepository, weatherRepo repository.WeatherRepository, cachingRepo repository.CachingRepository) TasksService {
+	return &taskService{
+		conf: conf,
+		tasksRepo: tasksRepo,
+		weatherRepo: weatherRepo,
+		cachingRepo: cachingRepo,
+	}
+}
+
+func (ts *taskService) GetUserTasks(userId int, params *entities.SearchTasksParams) ([]entities.GetTaskDto, error) {
+	if params != nil {
+		return ts.GetTasksDirectly(userId, params)
+	}
+
+	tasks, err := ts.GetCachedTasks(userId)
+	if err != nil {
+		tasks, err = ts.GetTasksDirectly(userId, params)
+		if err != nil {
+			return tasks, err
+		}
+
+		id_str := strconv.Itoa(userId)
+		ts.cachingRepo.SetCached(id_str, tasks, ts.conf.TaskExpiration)
+		return tasks, nil
+	}
+
+	return tasks, nil
+}
+
+func (ts *taskService) GetTasksDirectly(userId int, params *entities.SearchTasksParams) ([]entities.GetTaskDto, error) {
+	tasks, err := ts.tasksRepo.GetUserTasks(userId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +69,23 @@ func (ts *service) GetUserTasks(id int, params *entities.SearchTasksParams) ([]e
 	return result, err
 }
 
-func (ts *service) CreateTask(userId int, city string, createTask entities.CreateTaskDto) (*entities.GetTaskDto, error) {
+func (s *taskService) GetCachedTasks(userId int) ([]entities.GetTaskDto, error) {
+	id_str := strconv.Itoa(userId)
+
+	data, err := s.cachingRepo.GetCached(id_str)
+	if err != nil {
+		return nil, err
+	}
+
+	var tasks []entities.GetTaskDto
+	if err = json.Unmarshal(data, &tasks); err != nil {
+		return nil, e.ErrJSONError
+	}
+
+	return tasks, nil
+}
+
+func (ts *taskService) CreateTask(userId int, city string, createTask entities.CreateTaskDto) (*entities.GetTaskDto, error) {
 	var weather string
 
 	if city != "" {
@@ -49,7 +107,7 @@ func (ts *service) CreateTask(userId int, city string, createTask entities.Creat
 	return &result, nil
 }
 
-func (ts *service) PatchTask(patchTask entities.PatchTaskDto) (*entities.GetTaskDto, error) {
+func (ts *taskService) PatchTask(patchTask entities.PatchTaskDto) (*entities.GetTaskDto, error) {
 	task, err := ts.tasksRepo.PatchTask(patchTask)
 	if err != nil {
 		return nil, err
@@ -60,6 +118,6 @@ func (ts *service) PatchTask(patchTask entities.PatchTaskDto) (*entities.GetTask
 	return &result, nil
 }
 
-func (ts *service) DeleteTask(id int) error {
+func (ts *taskService) DeleteTask(id int) error {
 	return ts.tasksRepo.DeleteTask(id)
 }

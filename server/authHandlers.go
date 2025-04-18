@@ -17,13 +17,13 @@ func (s *GinServer) SignUp(c *gin.Context) {
 		return
 	}
 
-	user, err := s.service.CreateUser(createUser)
+	user, err := s.service.UserService.CreateUser(createUser)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	accessToken, refreshToken, err := s.service.GenerateTokens(user.ID, user.City)
+	accessToken, refreshToken, err := s.service.AuthService.GenerateTokens(user.ID, user.City)
 	if err != nil {
 		c.Error(err)
 		return
@@ -42,13 +42,13 @@ func (s *GinServer) LogIn(c *gin.Context) {
 		return
 	}
 
-	user, err := s.service.LogIn(loginData)
+	user, err := s.service.UserService.LogIn(loginData)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 	
-	access, refresh, err := s.service.GenerateTokens(user.ID, user.City)
+	access, refresh, err := s.service.AuthService.GenerateTokens(user.ID, user.City)
 	if err != nil {
 		c.Error(err)
 		return
@@ -67,7 +67,7 @@ func (s *GinServer) GetUserInfo(c *gin.Context) {
 		return
 	}
 
-	user, err := s.service.GetUserInfo(claims.UserID)
+	user, err := s.service.UserService.GetUserInfo(claims.UserID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -83,7 +83,7 @@ func (s *GinServer) UpdateTokens(c *gin.Context) {
 		return
 	}
 
-	access, refresh, err := s.service.GenerateTokens(claims.UserID, claims.City)
+	access, refresh, err := s.service.AuthService.GenerateTokens(claims.UserID, claims.City)
 	if err != nil {
 		c.Error(err)
 		return

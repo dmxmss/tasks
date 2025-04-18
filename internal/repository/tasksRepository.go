@@ -29,11 +29,13 @@ func (t *TasksPostgresRepo) GetUserTasks(id int, params *entities.SearchTasksPar
 	var tasks []entities.Task
 	query := t.db.Where("user_id = ?", id)
 
-	if params.Status != nil {
-		query = query.Where("status = ?", *params.Status)
-	}
-	if params.Deadline != nil {
-		query = query.Where("deadline <= ?", *params.Deadline)
+	if params != nil {
+		if params.Status != nil {
+			query = query.Where("status = ?", *params.Status)
+		}
+		if params.Deadline != nil {
+			query = query.Where("deadline <= ?", *params.Deadline)
+		}
 	}
 
 	if err := query.Find(&tasks).Error; err != nil {

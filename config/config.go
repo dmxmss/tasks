@@ -6,6 +6,7 @@ import (
 
 	"sync"
 	"strings"
+	"time"
 )
 
 type (
@@ -15,6 +16,7 @@ type (
 		Auth *Auth
 		Hash *Hash
 		Weather *Weather
+		Redis *Redis
 	}
 
 	App struct {
@@ -49,6 +51,15 @@ type (
 		Key string
 		URL string
 	}
+
+	Redis struct {
+		Host string
+		Port string
+		Password string
+		DB int // db number to select on connection
+		TaskExpiration time.Duration
+		WeatherExpiration time.Duration
+	}
 )
 
 var (
@@ -80,6 +91,12 @@ func GetConfig() *Config {
 		viper.SetDefault("hash.cost", 10)
 
 		viper.SetDefault("weather.key", "")
+
+		viper.SetDefault("redis.host", "redis")
+		viper.SetDefault("redis.port", "6379")
+		viper.SetDefault("redis.db", 0)
+		viper.SetDefault("redis.taskexpiration", 30*time.Minute)
+		viper.SetDefault("redis.weatherexpiration", time.Hour)
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)

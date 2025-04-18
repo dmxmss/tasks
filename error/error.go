@@ -16,10 +16,13 @@ const (
 	ErrInvalidRequestBody
 	ErrUserAlreadyExists
 	ErrUserNotFound
+	ErrCityNotFound
 	ErrUserTasksNotFound
 	ErrTokenSigningError
 	ErrGetWeatherFailed
-	ErrCityNotFound
+	ErrRedisKeyNotFound
+	ErrRedisSettingValue
+	ErrJSONError
 )
 
 func (e Error) Error() string {
@@ -59,6 +62,12 @@ func (e Error) Error() string {
 		err = "Failed getting weather"
 	case ErrCityNotFound:
 		err = "City not found"
+	case ErrRedisKeyNotFound:
+		err = "Redis key not found"
+	case ErrRedisSettingValue:
+		err = "Redis failed setting value"
+	case ErrJSONError:
+		err = "Error serializing to or deserializing from json value"
 	}
 
 	return err

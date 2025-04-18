@@ -4,6 +4,7 @@ import (
 	"github.com/dmxmss/tasks/config"
 	"github.com/dmxmss/tasks/service"
 	e "github.com/dmxmss/tasks/error"
+	"github.com/redis/go-redis/v9"
 	"github.com/dmxmss/tasks/entities"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -11,6 +12,7 @@ import (
 	"fmt"
 	"strings"
 	"log"
+	"context"
 )
 
 type GetUserTasksParams = entities.SearchTasksParams
@@ -18,13 +20,13 @@ type GetUserTasksParams = entities.SearchTasksParams
 type GinServer struct {
 	app *gin.Engine
 	conf *config.Config
-	service service.Service
+	service *service.Service
 }
 
-func NewGinServer(conf *config.Config, db *gorm.DB) (*GinServer, error) {
+func NewGinServer(conf *config.Config, db *gorm.DB, ctx context.Context, redisClient *redis.Client) (*GinServer, error) {
 	r := gin.Default()
 
-	service, err := service.NewService(conf, db)
+	service, err := service.NewService(conf, db, ctx, redisClient)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/dmxmss/tasks/entities"
+	"github.com/dmxmss/tasks/internal/repository"
 	e "github.com/dmxmss/tasks/error"
 )
 
@@ -11,7 +12,19 @@ type UserService interface {
 	GetUserInfo(int) (*entities.GetUserDto, error)
 }
 
-func (s *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetUserDto, error) {
+type userService struct {
+	userRepo repository.UserRepository
+	hashRepo repository.HashRepository
+}
+
+func NewUserService(userRepo repository.UserRepository, hashRepo repository.HashRepository) UserService {
+	return &userService{
+		userRepo: userRepo,
+		hashRepo: hashRepo,
+	}
+}
+
+func (s *userService) CreateUser(createUser entities.CreateUserDto) (*entities.GetUserDto, error) {
 	hashedPassword, err := s.hashRepo.HashPassword(createUser.Password)
 	if err != nil {
 		return nil, err
@@ -31,7 +44,7 @@ func (s *service) CreateUser(createUser entities.CreateUserDto) (*entities.GetUs
 	}, nil
 }
 
-func (s *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, error) {
+func (s *userService) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, error) {
 	user, err := s.userRepo.GetUserBy(entities.SearchUserDto{Email: &login.Email})
 	if err != nil {
 		return nil, err
@@ -49,7 +62,7 @@ func (s *service) LogIn(login entities.LoginUserDto) (*entities.GetUserDto, erro
 	}, nil
 }
 
-func (s *service) GetUserInfo(userId int) (*entities.GetUserDto, error) {
+func (s *userService) GetUserInfo(userId int) (*entities.GetUserDto, error) {
 	user, err := s.userRepo.GetUserBy(entities.SearchUserDto{ID: &userId})
 	if err != nil {
 		return nil, err
